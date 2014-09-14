@@ -1,9 +1,8 @@
 defmodule Game.WorldChannel do
   use Phoenix.Channel
-  alias Phoenix.Topic
   alias Phoenix.Socket
 
-  def join(socket, hash, message) do
+  def join(socket, _hash, message) do
     player_id = message["player"]
 
     socket = socket |> Socket.assign :player, player_id
@@ -15,26 +14,15 @@ defmodule Game.WorldChannel do
     {:ok, socket}
   end
 
-  def join(socket, _private_topic, _message) do
-    {:error, socket, :unauthorized}
-  end
-
-  def leave(socket, message) do
+  def leave(socket, _message) do
     player = socket |> Socket.get_assign :player
     broadcast socket, "player:left", %{player: player}
     socket
   end
 
   def event(socket, "sync", message) do
-    player = socket |> Socket.get_assign :player
     broadcast socket, "player:sync", message
     socket
   end
 
-  def event(socket, "new:msg", message) do
-    broadcast socket, "new:msg", message
-    socket
-  end
-
-  defp namespaced(channel, topic), do: "#{channel}:#{topic}"
 end
